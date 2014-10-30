@@ -1,0 +1,8 @@
+{
+  "ldap_admin_account" : "admin",
+  "ldap_admin_password" : "password",
+  "ldap_url" : "ldap://ipa.example.com:389/",
+  "ldap_search_base" : "cn=users,cn=accounts,dc=example,dc=com",
+  "zimbra_admin_account" : "admin",
+  "zimbra_admin_password" : "password"
+}

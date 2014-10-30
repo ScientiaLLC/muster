@@ -1,0 +1,101 @@
+<head>
+  <title>Scientia LLC - Muster</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+</body>
+
+<template name="layout">
+  {{yield 'header'}}
+
+  <section class="content">
+    <div class="content-inner">
+      {{yield}}
+    </div>
+  </section>
+</template>
+
+<template name="home">
+  {{> locations}}
+</template>
+
+<template name="loading">
+  <span align="center">{{> spinner}}</span>
+</template>
+
+<template name="notFound">
+  <img src="{{ pathFor 'image_404' }}" alt="404" width="100%">
+</template>
+
+<template name="header">
+<!-- <header class="navbar navbar-inverse navbar-fixed-top" role="banner"> -->
+  <nav class="navbar navbar-default" role="navigation">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="{{ pathFor 'home' }}">Scientia LLC <small><small>Muster</small></small></a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <!-- <li class="active"><a href="#">Link</a></li>
+        <li><a href="#">Link</a></li> -->
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        {{> user_info}}
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </nav>
+</template>
+
+<template name="header_logo_only">
+  <nav class="navbar navbar-default" role="navigation">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="{{ pathFor 'home' }}">Scientia LLC <small><small>Muster</small></small></a>
+    </div>
+  </nav>
+</template>
+
+<template name="user_info">
+  {{#if session "currentUser"}}
+    {{#if user_cn}}
+      <li><a href="#">Welcome {{user_cn}}</a></li>
+      <li><button type="button" id="submit" class="btn btn-primary" style="margin: 8.5px">Check In</button></li>
+    {{/if}}
+  {{else}}
+    <!-- <li>Error retrieving REMOTE_USER, contact your sys admin.</li> -->
+    <li>Error retrieving X-FORWARDED-USER, contact your sys admin.</li>
+  {{/if}}
+</template>
+
+<template name="locations">
+  <div class="container">
+    <table class="table table-striped">
+      {{#each employee_locations}}
+        <tr>
+          <td>{{name}}</td>
+          {{#if older_than_today}}
+            <td style="color: red">{{formatDate time}}</td>
+          {{else}}
+            <td style="color: green">{{formatDate time}}</td>
+          {{/if}}
+          <td>{{printPrecision lat 3}}</td>
+          <td>{{printPrecision lon 3}}</td>
+          <td><a href="#" id="nearbyText" data-url="{{ pathFor 'post' }}" data-name="nearby" class="editable" data-pk="{{pk}}" data-showbuttons="false" data-mode="inline" data-placeholder="Enter location name" data-emptytext="N/A" data-type="text" data-title="Enter Location Name">{{nearby}}</a></td>
+          <td><a href="https://maps.google.com/maps?q={{printPrecision lat 3}},{{printPrecision lon 3}}&hl=en&ll={{printPrecision lat 3}},{{printPrecision lon 3}}&spn=0.014555,0.023239&sspn=7.362253,11.898193&t=h&z=16" target="_blank">Google Maps</a></td>
+        </tr>
+      {{/each}}
+    </table>
+  </div>
+</template>
+
+<template name="about">
+  <h1>About</h1>
+</template>
