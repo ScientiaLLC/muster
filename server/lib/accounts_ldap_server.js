@@ -1,117 +1,98 @@
 console.log('loading accounts_ldap_server.js');
 
-var ldapjs = Meteor.require('ldapjs');
-var Future = Meteor.require('fibers/future');
-
-ldapjs.Attribute.settings.guid_format = ldapjs.GUID_FORMAT_B;
+MeteorWrapperLdapjs.Attribute.settings.guid_format =
+    MeteorWrapperLdapjs.GUID_FORMAT_B;
 
 LDAP = {};
-LDAP.ldap = ldapjs;
-LDAP.client;
-
-LDAP.client = ldapjs.createClient({
+LDAP.ldap = MeteorWrapperLdapjs;
+LDAP.client = LDAP.ldap.createClient({
   url: Meteor.settings.ldap_url + Meteor.settings.ldap_search_base
 });
 
-LDAP.bind = function() {
-  var binddn = "uid=" + Meteor.settings.ldap_admin_account + "," + Meteor.settings.ldap_search_base;
-  var fut = new Future();
-
-  // console.log("binddn = " + binddn);
-
-  LDAP.client.bind(binddn, Meteor.settings.ldap_admin_password, function(err) {
-    if (err) {
-      console.log('error = ' + err);
-      fut.return(false);
-    } else {
-      fut.return(true);
-    }
-  });
-
-  return fut.wait();
-}
-
-LDAP.search = function(username, callback) {
-  var opts = {
-    filter: '(&(uid=' + username + ')(objectClass=posixAccount))',
-    scope: 'sub',
-    attributes: ['cn', 'mail']
-  };
-  var fut = new Future();
-
-  LDAP.client.search(Meteor.settings.ldap_search_base, opts, function(err, search) {
+var wrappedLdapBind = Meteor.wrapAsync(LDAP.client.bind, LDAP.client);
+// the search method still requires a callback because it is an event-emitter
+LDAP.asyncSearch = function (binddn, opts, callback) {
+  LDAP.client.search(binddn, opts, function(err, search) {
     if (err) {
       if (callback && typeof callback === "function") {
         callback(false);
       }
-      fut.return(false);
     } else {
       search.on('searchEntry', function(entry) {
         var user = entry.object;
-        // console.log(user.cn);
-        // console.log(user.mail);
         if (callback && typeof callback === "function") {
           callback(null, {cn: user.cn, mail: user.mail});
         }
-        fut.return(true);
       });
 
       search.on('error', function(err) {
-        throw new Meteor.Error(500, 'LDAP server error');
-        fut.return(false);
+        callback(false);
       });
     }
   });
+};
+var wrappedLdapSearch = Meteor.wrapAsync(LDAP.asyncSearch, LDAP);
 
-  return fut.wait();
-}
-
-LDAP.checkAccount = function(username, callback) {
-  var res = LDAP.bind();
-  if (!res) {
-    return false;
-  }
-  if (LDAP.search(username, callback)) {
+LDAP.bind = function() {
+  var binddn = "uid=" + Meteor.settings.ldap_admin_account + "," +
+      Meteor.settings.ldap_search_base;
+  var res = wrappedLdapBind(binddn, Meteor.settings.ldap_admin_password);
+  if (res.status == 0) {
     return true;
   } else {
     return false;
   }
+}
+
+LDAP.search = function(username) {
+  var opts = {
+      filter: '(&(uid=' + username + ')(objectClass=posixAccount))',
+      scope: 'sub',
+      attributes: ['cn','mail']  // add more ldap search attributes when needed
+  };
+
+  return wrappedLdapSearch(Meteor.settings.ldap_search_base, opts);
 };
+
+LDAP.checkAccount = function(username, callback) {
+    var res = LDAP.bind();
+
+    if (res) {
+      var sres = LDAP.search(username);
+      if (sres) {
+        callback(null, sres);
+      }
+    } else {
+      throw new Meteor.Error(500, 'LDAP server error');
+    }
+}
 
 // use Meteor.startup whenever you need something to load after all of the
 // other js files are loaded
 Meteor.startup(function() {
   Meteor.methods({
     getLdapEmployeeInfo: function(username) {
-      var user_cn = null;
-      var user_mail = null;
       var success = false;
       try {
-        if (LDAP.checkAccount(username, function(error, result) {
-          user_cn = result.cn;
-          user_mail = result.mail;
-        })) {
-          success = true;
-        } else {
-          success = false;
-        }
+        LDAP.checkAccount(username, function(error, result) {
+          if (result) {
+            EmployeeInfo.upsert(
+              {username: username},
+              {username: username,
+                cn: result.cn,
+                mail: result.mail
+              }
+            );
+
+            // console.log(EmployeeInfo.find({}).fetch());
+            success = true;
+          }
+        });
       } catch(e) {
-        success = false;
+        console.log('could not get LdapEmployeeInfo: ' + e.message);
       }
 
-      if (success) {
-        EmployeeInfo.upsert(
-            {username: username},
-            {username: username,
-              cn: user_cn,
-              mail: user_mail
-            }
-        );
-        // console.log(EmployeeInfo.find({}).fetch());
-        return true;
-      } else {
-        return false;
-      }
+      return success;
     }
   });
 });

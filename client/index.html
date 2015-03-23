@@ -7,11 +7,11 @@
 </body>
 
 <template name="layout">
-  {{yield 'header'}}
+  {{> yield region='header'}}
 
   <section class="content">
     <div class="content-inner">
-      {{yield}}
+      {{> yield}}
     </div>
   </section>
 </template>
