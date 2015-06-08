@@ -77,21 +77,23 @@
 
 <template name="locations">
   <div class="container">
-    <table class="table table-striped">
-      {{#each employee_locations}}
-        <tr>
-          <td>{{name}}</td>
-          {{#if older_than_today}}
-            <td style="color: red">{{formatDate time}}</td>
-          {{else}}
-            <td style="color: green">{{formatDate time}}</td>
-          {{/if}}
-          <td>{{printPrecision lat 3}}</td>
-          <td>{{printPrecision lon 3}}</td>
-          <td><a href="#" id="nearbyText" data-url="{{ pathFor 'post' }}" data-name="nearby" class="editable" data-pk="{{pk}}" data-showbuttons="false" data-mode="inline" data-placeholder="Enter location name" data-emptytext="N/A" data-type="text" data-title="Enter Location Name">{{nearby}}</a></td>
-          <td><a href="https://maps.google.com/maps?q={{printPrecision lat 3}},{{printPrecision lon 3}}&hl=en&ll={{printPrecision lat 3}},{{printPrecision lon 3}}&spn=0.014555,0.023239&sspn=7.362253,11.898193&t=h&z=16" target="_blank">Google Maps</a></td>
-        </tr>
-      {{/each}}
+    <table class="table table-hover table-striped">
+      <tbody>
+        {{#each employee_locations}}
+          <tr>
+            <td>{{name}}</td>
+            {{#if older_than_today}}
+              <td style="color: red">{{formatDate time}}</td>
+            {{else}}
+              <td style="color: green">{{formatDate time}}</td>
+            {{/if}}
+            <td>{{printPrecision lat 3}}</td>
+            <td>{{printPrecision lon 3}}</td>
+            <td><a href="#" id="nearbyText" data-url="{{ pathFor 'post' }}" data-name="nearby" class="editable" data-pk="{{pk}}" data-showbuttons="false" data-mode="inline" data-placeholder="Enter location name" data-emptytext="N/A" data-type="text" data-title="Enter Location Name">{{nearby}}</a></td>
+            <td><a href="https://maps.google.com/maps?q={{printPrecision lat 3}},{{printPrecision lon 3}}&hl=en&ll={{printPrecision lat 3}},{{printPrecision lon 3}}&spn=0.014555,0.023239&sspn=7.362253,11.898193&t=h&z=16" target="_blank">Google Maps</a></td>
+          </tr>
+        {{/each}}
+      </tbody>
     </table>
   </div>
 </template>
