@@ -34,8 +34,7 @@ LDAP.asyncSearch = function (binddn, opts, callback) {
 var wrappedLdapSearch = Meteor.wrapAsync(LDAP.asyncSearch, LDAP);
 
 LDAP.bind = function() {
-  var binddn = "uid=" + Meteor.settings.ldap_admin_account + "," +
-      Meteor.settings.ldap_search_base;
+  var binddn = Meteor.settings.ldap_admin_account;
   var res = wrappedLdapBind(binddn, Meteor.settings.ldap_admin_password);
   if (res.status == 0) {
     return true;
