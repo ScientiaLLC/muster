@@ -1,4 +1,6 @@
 # muster
 
-FROM meteorhacks/meteord
-MAINTAINER Lucas Johnson <lucas.johnson@scientiallc.com>
+FROM ulexus/meteor:build
+
+COPY . /home/meteor/src
+RUN chown -R meteor:meteor /home/meteor/
