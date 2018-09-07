@@ -1,10 +1,9 @@
 console.log('loading accounts_ldap_server.js');
 
-MeteorWrapperLdapjs.Attribute.settings.guid_format =
-    MeteorWrapperLdapjs.GUID_FORMAT_B;
+// LDAPJS.Attribute.settings.guid_format = LDAPJS.GUID_FORMAT_B;
 
 LDAP = {};
-LDAP.ldap = MeteorWrapperLdapjs;
+LDAP.ldap = LDAPJS;
 LDAP.client = LDAP.ldap.createClient({
   url: Meteor.settings.ldap_url + Meteor.settings.ldap_search_base
 });

@@ -1,6 +1,1 @@
-# muster
-
-FROM ulexus/meteor:build
-
-COPY . /home/meteor/src
-RUN chown -R meteor:meteor /home/meteor/
+FROM jshimko/meteor-launchpad:latest

@@ -1,3 +1,4 @@
 .idea/
 settings.json
 smart.lock
+node_modules/
